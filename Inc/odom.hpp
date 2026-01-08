@@ -114,7 +114,7 @@ public:
     void Odometry_Update(Eigen::Quaternionf q, Eigen::Vector3f acc, float _vel, float _yaw)
     {
         // 将加速度从机体坐标系转换到世界坐标系
-        Eigen::Vector3f a_world = q * acc;
+        Eigen::Vector3f a_world = q*acc;
 
         // 计算 x 方向的加速度分量
         float yaw_rad = _yaw * M_PI / 180.0f;

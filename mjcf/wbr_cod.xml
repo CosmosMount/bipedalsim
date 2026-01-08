@@ -1,10 +1,10 @@
 <?xml version='1.0' encoding='utf-8'?>
-<mujoco model="Bipedal">
+<mujoco model="wbr_cod">
   <default>
     <geom contype="1" conaffinity="0"/>
   </default>
   <compiler angle="radian" meshdir="./meshes" autolimits="true" />
-  <!-- <option timestep="0.01" gravity="0 0 -9.81" integrator="implicitfast" /> -->
+  <option timestep="0.01" gravity="0 0 -9.81" integrator="implicitfast" />
   <visual>
       <quality shadowsize="16384" numslices="28" offsamples="4" />
       <headlight diffuse="1 1 1" specular="0.5 0.5 0.5" active="0" />
@@ -38,6 +38,7 @@
         condim="3" />
     <body name="base_body" pos="0 0 1">
       <freejoint />
+      <site name="imu" size="0.01" quat="1 0 0 0" />
       <geom type="mesh" rgba="1 1 1 1" mesh="base_link" contype="1" conaffinity="1" />
     
       <body name="Left_front_link" pos="-0.0193914 -0.1837 -0.05">
@@ -55,7 +56,6 @@
             <joint name="Left_front_child2_joint" pos="0 0 0" axis="0 1 0" damping="0.02"  range="0 0.98"/>
             <site name="Left_front_site1" pos="-0.098 -0.002 0.0665" size="0.005" rgba="1 0 0 1"/>
             <geom type="mesh" rgba="1 1 1 1" mesh="Left_front_child2_link" />
-          
             
             <body name="Left_front_child3_link" pos="-0.131927 0.001 0.116079">
               <inertial pos="-0.056516 0.0047872 -0.0018655" quat="0.50818 0.491683 0.491683 0.50818" mass="0.25" diaginertia="4.8247e-05 4.75555e-05 1.17022e-06" />
@@ -73,7 +73,6 @@
         <joint name="Left_rear_joint" pos="0 0 0" axis="0 -1 0" damping="0.1"  range="-1 1"/>
         <site name="Left_rear_site1" pos="-0.1005 -0.025 -0.0035" size="0.005" rgba="1 1 0 1"/>           
         <geom type="mesh" rgba="1 1 1 1" mesh="Left_rear_link" contype="1" conaffinity="1" />
-        
       
         <body name="Left_rear_child1_link" pos="-0.214883 -0.0235 -0.00709287">
           <inertial pos="0.077559 -0.0084721 -0.050638" quat="0.322031 0.62952 0.62952 0.322031" mass="0.75" diaginertia="0.0026525 0.00255923 9.97263e-05" />
@@ -133,7 +132,7 @@
             <inertial pos="0.00017762 0.0099965 -0.00010174" quat="0.706853 0.0171001 0.0170535 0.706948" mass="0.9" diaginertia="0.00043712 0.000230404 0.000228896" />
             <joint name="Right_Wheel_joint" pos="0 0 0" axis="0 -1 0" damping="0.01"/>
             <geom type="mesh" rgba="0.79216 0.81961 0.93333 1" mesh="Right_Wheel_link" contype="1" conaffinity="1" />
-          
+         
           </body>
         </body>
       </body>
@@ -141,11 +140,17 @@
   </worldbody>
   
   <equality>
-      <connect name="Left_loop1" site1="Left_front_site1" site2="Left_rear_site1" solref="0.001 1" solimp="0.99 0.99 0.01 0.5 2"/>
-      <connect name="Left_loop2" site1="Left_front_site2" site2="Left_rear_site2" solref="0.001 1" solimp="0.99 0.99 0.01 0.5 2"/>
-      <connect name="Right_loop1" site1="Right_front_site1" site2="Right_rear_site1" solref="0.001 1" solimp="0.99 0.99 0.01 0.5 2"/>
-      <connect name="Right_loop2" site1="Right_front_site2" site2="Right_rear_site2" solref="0.001 1" solimp="0.99 0.99 0.01 0.5 2"/>
+    <connect name="Left_loop1" site1="Left_front_site1" site2="Left_rear_site1" solref="0.001 1" solimp="0.99 0.99 0.01 0.5 2"/>
+    <connect name="Left_loop2" site1="Left_front_site2" site2="Left_rear_site2" solref="0.001 1" solimp="0.99 0.99 0.01 0.5 2"/>
+    <connect name="Right_loop1" site1="Right_front_site1" site2="Right_rear_site1" solref="0.001 1" solimp="0.99 0.99 0.01 0.5 2"/>
+    <connect name="Right_loop2" site1="Right_front_site2" site2="Right_rear_site2" solref="0.001 1" solimp="0.99 0.99 0.01 0.5 2"/>
   </equality>
+
+  <sensor>
+    <framequat name="imu_quat" objtype="body" objname="base_body" />
+    <accelerometer name="imu_accel" site="imu" />
+    <gyro name="imu_gyro" site="imu" />
+  </sensor>
 
   <actuator>
     <general name="Left_front_joint_actuator" joint="Left_front_joint" gainprm="1" ctrlrange="-3.14 3.14" />
