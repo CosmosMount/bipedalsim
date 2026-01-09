@@ -4,8 +4,11 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "/opt/mujoco/include",
-                "/usr/include/eigen3"
+                "/usr/include/eigen3",
+                "/opt/ros/humble/include/**",
+                "${workspaceFolder}/lowlevel/**",
+                "${workspaceFolder}/controller/**",
+                "~/Desktop/gazebo_ws/install/**"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",

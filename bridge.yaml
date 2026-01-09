@@ -1,0 +1,77 @@
+# 键盘输入桥接（如果使用Gazebo键盘插件）
+- ros_topic_name: "/keyboard/keypress"
+  gz_topic_name: "/keyboard/keypress"
+  ros_type_name: "std_msgs/msg/Int32"
+  gz_type_name: "gz.msgs.Int32"
+  direction: GZ_TO_ROS
+  qos_profile: RELIABLE
+
+# 右轮力矩控制（ROS到Gazebo）
+- ros_topic_name: "/model/bipedal/joint/Rwheel_joint/cmd_force"
+  gz_topic_name: "/model/bipedal/joint/Rwheel_joint/cmd_force"
+  ros_type_name: "std_msgs/msg/Float64"
+  gz_type_name: "gz.msgs.Double"
+  direction: ROS_TO_GZ
+  qos_profile: RELIABLE
+
+# 左轮力矩控制（ROS到Gazebo） 
+- ros_topic_name: "/model/bipedal/joint/Lwheel_joint/cmd_force"
+  gz_topic_name: "/model/bipedal/joint/Lwheel_joint/cmd_force"
+  ros_type_name: "std_msgs/msg/Float64"
+  gz_type_name: "gz.msgs.Double"
+  direction: ROS_TO_GZ
+  qos_profile: RELIABLE
+
+# 右大腿关节力矩控制
+- ros_topic_name: "/model/bipedal/joint/Rbig_joint/cmd_force"
+  gz_topic_name: "/model/bipedal/joint/Rbig_joint/cmd_force"
+  ros_type_name: "std_msgs/msg/Float64"
+  gz_type_name: "gz.msgs.Double"
+  direction: ROS_TO_GZ
+  qos_profile: RELIABLE
+
+# 右小腿关节力矩控制
+- ros_topic_name: "/model/bipedal/joint/Rsmall_joint/cmd_force"
+  gz_topic_name: "/model/bipedal/joint/Rsmall_joint/cmd_force"
+  ros_type_name: "std_msgs/msg/Float64"
+  gz_type_name: "gz.msgs.Double"
+  direction: ROS_TO_GZ
+  qos_profile: RELIABLE
+
+# 左大腿关节力矩控制
+- ros_topic_name: "/model/bipedal/joint/Lbig_joint/cmd_force"
+  gz_topic_name: "/model/bipedal/joint/Lbig_joint/cmd_force"
+  ros_type_name: "std_msgs/msg/Float64"
+  gz_type_name: "gz.msgs.Double"
+  direction: ROS_TO_GZ
+  qos_profile: RELIABLE
+
+# 左小腿关节力矩控制
+- ros_topic_name: "/model/bipedal/joint/Lsmall_joint/cmd_force"
+  gz_topic_name: "/model/bipedal/joint/Lsmall_joint/cmd_force"
+  ros_type_name: "std_msgs/msg/Float64"
+  gz_type_name: "gz.msgs.Double"
+  direction: ROS_TO_GZ
+  qos_profile: RELIABLE
+
+# 关节状态反馈（Gazebo到ROS）
+- ros_topic_name: "/joint_states"
+  gz_topic_name: "/world/car_world/model/bipedal/joint_state"
+  ros_type_name: "sensor_msgs/msg/JointState"
+  gz_type_name: "gz.msgs.Model"
+  direction: GZ_TO_ROS
+  qos_profile: RELIABLE
+
+# IMU传感器数据（Gazebo到ROS）
+- ros_topic_name: "/imu/data"
+  gz_topic_name: "/model/bipedal/imu"
+  ros_type_name: "sensor_msgs/msg/Imu"
+  gz_type_name: "gz.msgs.IMU"
+  direction: GZ_TO_ROS
+  qos_profile: RELIABLE
+
+- ros_topic_name: "/clock"
+  gz_topic_name: "/clock"
+  ros_type_name: "rosgraph_msgs/msg/Clock"
+  gz_type_name: "gz.msgs.Clock"
+  direction: GZ_TO_ROS

@@ -1,0 +1,151 @@
+<?xml version="1.0" ?>
+<sdf version="1.8">
+  <world name="friction_simple">
+    <physics name="physics" type="ode">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+      <ode>
+        <solver>
+          <type>quick</type>
+          <iters>50</iters>
+        </solver>
+      </ode>
+    </physics>
+    
+    <plugin filename="libignition-gazebo-physics-system.so" 
+            name="ignition::gazebo::systems::Physics"/>
+    <plugin filename="libignition-gazebo-scene-broadcaster-system.so"
+            name="ignition::gazebo::systems::SceneBroadcaster"/>
+    <plugin filename="libignition-gazebo-user-commands-system.so"
+            name="ignition::gazebo::systems::UserCommands"/>
+    
+    <light type="directional" name="sun">
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>1.0 1.0 1.0 1</diffuse>
+      <specular>0.5 0.5 0.5 1</specular>
+      <direction>-0.5 0.1 -0.9</direction>
+      <cast_shadows>true</cast_shadows>
+    </light>
+
+    <!-- 平坦地面 -->
+    <model name="ground">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>10 10</size>
+            </plane>
+          </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>1.0</mu>
+                <mu2>1.0</mu2>
+              </ode>
+            </friction>
+          </surface>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>10 10</size>
+            </plane>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <!-- 盒子A：高摩擦，施加水平力 -->
+    <model name="box_high_friction">
+      <pose>-2 0 0.5 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>10.0</mass>
+          <inertia>
+            <ixx>0.167</ixx>
+            <iyy>0.167</iyy>
+            <izz>0.167</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry>
+            <box><size>1 1 1</size></box>
+          </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>0.8</mu>
+                <mu2>0.8</mu2>
+              </ode>
+            </friction>
+          </surface>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box><size>1 1 1</size></box>
+          </geometry>
+          <material>
+            <ambient>0 1 0 1</ambient>
+            <diffuse>0 1 0 1</diffuse>
+          </material>
+        </visual>
+      </link>
+      
+      <!-- 持续施加 50N 水平力 -->
+      <plugin filename="libignition-gazebo-apply-link-wrench-system.so"
+              name="ignition::gazebo::systems::ApplyLinkWrench">
+        <link_name>link</link_name>
+        <force>50 0 0</force>
+        <persistent>true</persistent>
+      </plugin>
+    </model>
+
+    <!-- 盒子B：低摩擦，施加相同水平力 -->
+    <model name="box_low_friction">
+      <pose>2 0 0.5 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>10.0</mass>
+          <inertia>
+            <ixx>0.167</ixx>
+            <iyy>0.167</iyy>
+            <izz>0.167</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry>
+            <box><size>1 1 1</size></box>
+          </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>0.05</mu>
+                <mu2>0.05</mu2>
+              </ode>
+            </friction>
+          </surface>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box><size>1 1 1</size></box>
+          </geometry>
+          <material>
+            <ambient>1 0 0 1</ambient>
+            <diffuse>1 0 0 1</diffuse>
+          </material>
+        </visual>
+      </link>
+      
+      <!-- 持续施加 50N 水平力 -->
+      <plugin filename="libignition-gazebo-apply-link-wrench-system.so"
+              name="ignition::gazebo::systems::ApplyLinkWrench">
+        <link_name>link</link_name>
+        <force>50 0 0</force>
+        <persistent>true</persistent>
+      </plugin>
+    </model>
+  </world>
+</sdf>

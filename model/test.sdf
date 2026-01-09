@@ -1,0 +1,163 @@
+<?xml version="1.0" ?>
+<sdf version="1.8">
+    <world name="car_world">
+        <physics name="1ms" type="dart">
+            <max_step_size>0.001</max_step_size>
+            <real_time_factor>1.0</real_time_factor>
+        </physics>
+        <plugin
+            filename="libignition-gazebo-physics-system.so"
+            name="ignition::gazebo::systems::Physics">
+        </plugin>
+        <plugin
+            filename="libignition-gazebo-user-commands-system.so"
+            name="ignition::gazebo::systems::UserCommands">
+        </plugin>
+        <plugin
+            filename="libignition-gazebo-scene-broadcaster-system.so"
+            name="ignition::gazebo::systems::SceneBroadcaster">
+        </plugin>
+        <plugin 
+            filename="libignition-gazebo-imu-system.so"
+            name="ignition::gazebo::systems::Imu">
+        </plugin>
+        <plugin 
+            filename="libignition-gazebo-sensors-system.so"
+            name="ignition::gazebo::systems::Sensors">
+            <render_engine>ogre2</render_engine>
+        </plugin>
+        <plugin 
+            filename="libignition-gazebo-contact-system.so"
+            name="ignition::gazebo::systems::Contact">
+        </plugin>
+
+        <light type="directional" name="sun">
+            <cast_shadows>true</cast_shadows>
+            <pose>0 0 10 0 0 0</pose>
+            <diffuse>0.8 0.8 0.8 1</diffuse>
+            <specular>0.2 0.2 0.2 1</specular>
+            <attenuation>
+                <range>1000</range>
+                <constant>0.9</constant>
+                <linear>0.01</linear>
+                <quadratic>0.001</quadratic>
+            </attenuation>
+            <direction>-0.5 0.1 -0.9</direction>
+        </light>
+
+        <model name="ground_plane">
+            <static>true</static>
+            <link name="link">
+                <collision name="collision">
+                <geometry>
+                    <plane>
+                    <normal>0 0 1</normal>
+                    </plane>
+                </geometry>
+                </collision>
+                <visual name="visual">
+                <geometry>
+                    <plane>
+                    <normal>0 0 1</normal>
+                    <size>100 100</size>
+                    </plane>
+                </geometry>
+                <material>
+                    <ambient>0.8 0.8 0.8 1</ambient>
+                    <diffuse>0.8 0.8 0.8 1</diffuse>
+                    <specular>0.8 0.8 0.8 1</specular>
+                </material>
+                </visual>
+            </link>
+        </model>
+
+        <model name="stair">
+          <pose>0 0 0.2 0 0 0</pose> <!-- Position: X=0, Y=0, Z=0 (at the ground) -->
+          <link name="stair_link">
+            <collision name='stair_collision'>
+              <pose>0 0 -0.01 0 0 0</pose>
+              <geometry>
+                <mesh>
+                  <scale>1 1 1</scale>
+                  <uri>model://meshes/DoubleStair.stl</uri>
+                </mesh>
+              </geometry>
+            </collision>
+            <visual name="visual">
+              <geometry>
+                <mesh>
+                  <!-- Update the model path -->
+                  <uri>model://meshes/DoubleStair.stl</uri>
+                  <scale>1 1 1</scale>
+                </mesh>
+              </geometry>
+              <material>
+                <ambient>0.2 0.2 0.2 1</ambient> 
+                <diffuse>0.2 0.2 0.2 1</diffuse>  
+                <specular>0.2 0.2 0.2 1</specular> 
+              </material>
+            </visual>
+          </link>
+        </model>
+
+        <model name="fly_slope">
+          <pose>3.0 0 0.35 0 0 0</pose> <!-- Position: X=0, Y=0, Z=0 (at the ground) -->
+          <link name="fly_slope_link">
+            <collision name='fly_slope_collision'>
+              <pose>0 0 -0.01 0 0 0</pose>
+              <geometry>
+                <mesh>
+                  <scale>1 1 1</scale>
+                  <uri>model://meshes/fly_slope.stl</uri>
+                </mesh>
+              </geometry>
+            </collision>
+            <visual name="visual">
+              <geometry>
+                <mesh>
+                  <!-- Update the model path -->
+                  <uri>model://meshes/fly_slope.stl</uri>
+                  <scale>1 1 1</scale>
+                </mesh>
+              </geometry>
+              <material>
+                <ambient>0.2 0.2 0.2 1</ambient> 
+                <diffuse>0.2 0.2 0.2 1</diffuse>  
+                <specular>0.2 0.2 0.2 1</specular> 
+              </material>
+            </visual>
+          </link>
+        </model>
+
+        <model name="bumps">
+          <pose>5.0 0 0.07 0 0 0</pose> <!-- Position: X=0, Y=0, Z=0 (at the ground) -->
+          <link name="bumps_link">
+            <collision name='bumps_collision'>
+              <pose>0 0 -0.01 0 0 0</pose>
+              <geometry>
+                <mesh>
+                  <scale>1 1 1</scale>
+                  <uri>model://meshes/bumps.stl</uri>
+                </mesh>
+              </geometry>
+            </collision>
+            <visual name="visual">
+              <geometry>
+                <mesh>
+                  <!-- Update the model path -->
+                  <uri>model://meshes/bumps.stl</uri>
+                  <scale>1 1 1</scale>
+                </mesh>
+              </geometry>
+              <material>
+                <ambient>0.2 0.2 0.2 1</ambient> 
+                <diffuse>0.2 0.2 0.2 1</diffuse>  
+                <specular>0.2 0.2 0.2 1</specular> 
+              </material>
+            </visual>
+          </link>
+        </model>
+
+    </world>
+</sdf>
+
