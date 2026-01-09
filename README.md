@@ -1,2 +1,2 @@
-# bipedalsim
-mujoco simulation of bipedal
+# wbr sim
+Mujoco simulation of wheel-balanced robot in RoboMaster

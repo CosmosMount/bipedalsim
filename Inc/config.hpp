@@ -14,6 +14,7 @@
 #define RHIP2_OFFSET 0x8419
 
 #define WHEEL_RADIUS 0.077f
+#define WHEEL_MASS 0.15f
 
 #define MAX_HIP_TOR 40.0f
 #define MAX_WHEEL_TOR 15.0f

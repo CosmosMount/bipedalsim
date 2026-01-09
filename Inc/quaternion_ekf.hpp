@@ -29,6 +29,8 @@ public:
     uint64_t UpdateCount = 0;
     uint64_t ErrorCount = 0;
 
+    Eigen::Quaternionf q = Eigen::Quaternionf::Identity(); // 当前四元数
+
     QuaternionEKF() : DynamicKalmanFilter(6, 0, 3) 
     {
         // 1. 初始化状态量 (单位四元数)
@@ -160,19 +162,23 @@ public:
     }
 
 private:
+
     void UpdateEulerAngles() 
     {
-        double q0 = xhat[0], q1 = xhat[1], q2 = xhat[2], q3 = xhat[3];
-        
-        yaw   = std::atan2(2.0 * (q1*q2 + q0*q3), q0*q0 + q1*q1 - q2*q2 - q3*q3) * 57.29578;
-        pitch = -std::asin(2.0 * (q1*q3 - q0*q2)) * 57.29578;
-        roll  = std::atan2(2.0 * (q0*q1 + q2*q3), q0*q0 - q1*q1 - q2*q2 + q3*q3) * 57.29578;
+        q = Eigen::Quaternionf(xhat[0], xhat[1], xhat[2], xhat[3]);
+
+        float q0 = xhat[0], q1 = xhat[1], q2 = xhat[2], q3 = xhat[3];
+        yaw   = std::atan2(2.0 * (q1*q2 + q0*q3), q0*q0 + q1*q1 - q2*q2 - q3*q3);
+        pitch = -std::asin(2.0 * (q1*q3 - q0*q2));
+        roll  = std::atan2(2.0 * (q0*q1 + q2*q3), q0*q0 - q1*q1 - q2*q2 + q3*q3);
 
         // Yaw 连续化处理
-        if (yaw - prev_yaw > 180.0)       yaw_round_count--;
-        else if (yaw - prev_yaw < -180.0) yaw_round_count++;
+        if (yaw - prev_yaw > M_PI)       
+            yaw_round_count--;
+        else if (yaw - prev_yaw < -M_PI) 
+            yaw_round_count++;
         
-        total_yaw = 360.0 * yaw_round_count + yaw;
+        total_yaw = M_PI*2*yaw_round_count + yaw;
         prev_yaw = yaw;
     }
 };

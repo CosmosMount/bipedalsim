@@ -111,7 +111,7 @@ public:
      * @param _yaw in degree
      * @return odometry_info
      */
-    void Odometry_Update(Eigen::Quaternionf q, Eigen::Vector3f acc, float _vel, float _yaw)
+    odometry_info_t Update(Eigen::Quaternionf q, Eigen::Vector3f acc, float _vel, float _yaw)
     {
         // 将加速度从机体坐标系转换到世界坐标系
         Eigen::Vector3f a_world = q*acc;
@@ -128,6 +128,8 @@ public:
         odom_data_.v = vel_fusion_kf_.GetVhat();
         odom_data_.x = vel_fusion_kf_.GetXhat();
         odom_data_.a_z = a_world.z();
+
+        return odom_data_;
     }
 
     // 重置里程计
@@ -135,11 +137,5 @@ public:
     {
         vel_fusion_kf_.ResetKF();
         odom_data_ = {0.0f, 0.0f, 0.0f};
-    }
-
-    // 获取当前里程计数据
-    odometry_info_t GetOdomData() const
-    {
-        return odom_data_;
     }
 };

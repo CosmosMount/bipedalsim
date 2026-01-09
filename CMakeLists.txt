@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(bipedalsim)
+project(wbrsim)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -21,10 +21,10 @@ endif()
 include_directories(Inc)
 
 # Define the executable
-add_executable(bipedalsim main.cpp)
+add_executable(wbrsim main.cpp)
 
 # Link libraries
-target_link_libraries(bipedalsim
+target_link_libraries(wbrsim
     PRIVATE
     Eigen3::Eigen
     mujoco::mujoco
