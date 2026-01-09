@@ -13,6 +13,7 @@
 #include "lqr.hpp"
 #include "odom.hpp"
 #include "config.hpp"
+#include "plotter.hpp"
 #include "quaternion_ekf.hpp"
 
 class sim
@@ -175,6 +176,10 @@ private:
     double lastx = 0;
     double lasty = 0;
 
+    // plotter
+    Plotter plotter;
+    uint64_t tick_count = 0;
+
     /*--------------------------- GLFW相关键鼠操作获取函数，必须是 static 才能匹配 GLFW 的函数签名 -------------------------------*/
     // keyboard callback
     static void keyboard(GLFWwindow *window, int key, int scancode, int act, int mods) 
@@ -310,6 +315,10 @@ private:
                 // vmc inverse kinematics
                 llen = lsolver.GetPendulumLen();
                 rlen = rsolver.GetPendulumLen();
+                lphi = lsolver.GetPendulumRadian();
+                rphi = rsolver.GetPendulumRadian();
+                lalpha = lphi-M_PI/2.0f+qekf.pitch;
+                ralpha = rphi-M_PI/2.0f+qekf.pitch;
                 Lqdot[0] = -ljoint4_vel;
                 Lqdot[1] = ljoint1_vel;
                 Rqdot[0] = rjoint4_vel;
@@ -320,42 +329,44 @@ private:
                 rlen_dot = Rxdot[0];
                 rphi_dot = Lxdot[1];
                 lphi_dot = Rxdot[1];
+                lalpha_dot = lphi_dot + qekf.pitch_dot;
+                ralpha_dot = rphi_dot + qekf.pitch_dot;
 
                 // odometry update
-                float vel = 0.5f*(lwheel_vel + rwheel_vel)*WHEEL_RADIUS;
+                float vel = 0.5f*(-lwheel_vel+rwheel_vel)*WHEEL_RADIUS;
                 Eigen::Vector3f acc_body(accel_data[0], accel_data[1], accel_data[2]);
                 odom = odometry.Update(qekf.q, acc_body, vel, qekf.yaw);
 
-                LTpfdb[0] = -ljoint1_tor;
-                LTpfdb[1] = -ljoint4_tor;
-                RTpfdb[0] = rjoint1_tor;
-                RTpfdb[1] = rjoint4_tor;
+                // LTpfdb[0] = -ljoint1_tor;
+                // LTpfdb[1] = -ljoint4_tor;
+                // RTpfdb[0] = rjoint1_tor;
+                // RTpfdb[1] = rjoint4_tor;
 
-                lsolver.VMCRevCal(TlRev, LTpfdb);
-                rsolver.VMCRevCal(TrRev, RTpfdb);
+                // lsolver.VMCRevCal(TlRev, LTpfdb);
+                // rsolver.VMCRevCal(TrRev, RTpfdb);
 
-                float Pl = TlRev[0]*std::cos(lalpha)+TlRev[1]/llen*std::sin(lalpha);
-                float Pr = TrRev[0]*std::cos(ralpha)+TrRev[1]/rlen*std::sin(ralpha);
-                float ddlenl = llen_dot - prev_llen_dot;
-                float ddlenr = rlen_dot - prev_rlen_dot;
-                float Nl = Pl + WHEEL_MASS*(odom.a_z - ddlenl*std::cos(lalpha));
-                float Nr = Pr + WHEEL_MASS*(odom.a_z - ddlenr*std::cos(ralpha));
-                float N = Nl + Nr;
+                // float Pl = TlRev[0]*std::cos(lalpha)+TlRev[1]/llen*std::sin(lalpha);
+                // float Pr = TrRev[0]*std::cos(ralpha)+TrRev[1]/rlen*std::sin(ralpha);
+                // float ddlenl = llen_dot - prev_llen_dot;
+                // float ddlenr = rlen_dot - prev_rlen_dot;
+                // float Nl = Pl + WHEEL_MASS*(odom.a_z - ddlenl*std::cos(lalpha));
+                // float Nr = Pr + WHEEL_MASS*(odom.a_z - ddlenr*std::cos(ralpha));
+                // float N = Nl + Nr;
 
                 // lqr update
                 observedX[0] = odom.x;//0.0f;//
                 observedX[1] = odom.v;//0.0f;//
                 observedX[2] = qekf.total_yaw;//0.0f;//
-                observedX[3] = gyro_data[2];//0.0f;//
+                observedX[3] = qekf.yaw_dot;//0.0f;//
                 observedX[4] = lalpha;//0.0f;//
                 observedX[5] = lalpha_dot;
                 observedX[6] = ralpha;//0.0f;//
                 observedX[7] = ralpha_dot;
                 observedX[8] = qekf.pitch;
-                observedX[9] = gyro_data[1];
+                observedX[9] = qekf.pitch_dot;
 
                 roll_pd.SetRef(cmd_roll);
-                float roll_pd_result = roll_pd.Update(qekf.roll, gyro_data[0]);
+                float roll_pd_result = roll_pd.Update(qekf.roll, qekf.roll_dot);
 
                 llen_pd.SetRef(cmd_len+0.03f+roll_pd_result);
                 Tl[0] = llen_pd.Update(llen, llen_dot);
@@ -378,7 +389,7 @@ private:
                 lqr_controller.LQRCal(Tout);
                 
                 simdata->ctrl[id_lwheel]=-Tout[0];
-                simdata->ctrl[id_rwheel]=-Tout[1];
+                simdata->ctrl[id_rwheel]=Tout[1];
 
                 Tl[1]=Tout[2];
                 Tr[1]=Tout[3];
@@ -387,10 +398,59 @@ private:
                 lsolver.VMCCal(Tl, LTp);
                 rsolver.VMCCal(Tr, RTp);
 
-                simdata->ctrl[id_ljoint4]= LTp[0];
+                simdata->ctrl[id_ljoint4]= -LTp[0];
                 simdata->ctrl[id_ljoint1]= -LTp[1];
-                simdata->ctrl[id_rjoint4]= -RTp[0];
+                simdata->ctrl[id_rjoint4]= RTp[0];
                 simdata->ctrl[id_rjoint1]= RTp[1];
+
+                if (++tick_count % 2 == 0) 
+                {
+                    char json_buf[2048]; // 增大缓冲区
+                    snprintf(json_buf, sizeof(json_buf),
+                        "{"
+                        "\"time\":%.3f,"
+                        // --- LQR 状态 ---
+                        "\"odom_x\":%.3f,\"odom_v\":%.3f,"
+                        "\"pitch\":%.3f,\"pitch_dot\":%.3f,"
+                        "\"yaw\":%.3f,\"yaw_dot\":%.3f,"
+                        // --- VMC 虚拟力 (输入) ---
+                        "\"L_F_virt\":%.3f,\"R_F_virt\":%.3f,"    // Tl[0], Tr[0] (长度PD输出)
+                        "\"L_Tau_virt\":%.3f,\"R_Tau_virt\":%.3f," // Tl[1], Tr[1] (LQR平衡力矩)
+                        // --- VMC 几何状态 ---
+                        "\"L_len\":%.3f,\"R_len\":%.3f,"
+                        "\"L_alpha\":%.3f,\"R_alpha\":%.3f,"
+                        "\"L_phi\":%.3f,\"R_phi\":%.3f,"
+                        // --- 关节力矩 (最终输出) ---
+                        "\"ctrl_L_j4\":%.3f,\"ctrl_L_j1\":%.3f,"
+                        "\"ctrl_R_j4\":%.3f,\"ctrl_R_j1\":%.3f,"
+                        "\"T_L_wheel\":%.3f,\"T_R_wheel\":%.3f,"
+                        // --- VMC 逆解反馈 (地面反力估算) ---
+                        "\"L_F_rev\":%.3f,\"R_F_rev\":%.3f,"       // TlRev[0], TrRev[0]
+                        "\"L_Tau_rev\":%.3f,\"R_Tau_rev\":%.3f"    // TlRev[1], TrRev[1]
+                        "}",
+                        simdata->time,
+                        // LQR
+                        observedX[0], observedX[1], 
+                        observedX[8], observedX[9],
+                        observedX[2], observedX[3],
+                        // VMC 虚拟力
+                        Tl[0], Tr[0],
+                        Tl[1], Tr[1],
+                        // 几何
+                        llen, rlen,
+                        lalpha, ralpha,
+                        lphi, rphi,
+                        // 输出力矩 (对应 XML 里的电机)
+                        simdata->ctrl[id_ljoint4], simdata->ctrl[id_ljoint1],
+                        simdata->ctrl[id_rjoint4], simdata->ctrl[id_rjoint1],
+                        simdata->ctrl[id_lwheel], simdata->ctrl[id_rwheel],
+                        // 逆解反馈
+                        TlRev[0], TrRev[0],
+                        TlRev[1], TrRev[1]
+                    );
+                    
+                    plotter.send(json_buf);
+                }
             }
             auto end_time = std::chrono::high_resolution_clock::now();
             std::chrono::duration<double> elapsed = end_time - start_time;

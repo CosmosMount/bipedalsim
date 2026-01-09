@@ -20,6 +20,7 @@ public:
     
     // 状态缓存
     double yaw = 0, pitch = 0, roll = 0;
+    double yaw_dot = 0, pitch_dot = 0, roll_dot = 0;
     double total_yaw = 0, prev_yaw = 0;
     int16_t yaw_round_count = 0;
     
@@ -59,6 +60,10 @@ public:
         double wx = gx - xhat[4];
         double wy = gy - xhat[5];
         double wz = gz - gyro_bias[2]; // 假设 z 轴偏置由外部维护或设为0
+
+        roll_dot  = wx;
+        pitch_dot = wy;
+        yaw_dot = gz;
 
         // --- 1. 预测步 (Prediction) ---
         
